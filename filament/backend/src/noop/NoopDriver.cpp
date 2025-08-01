@@ -116,6 +116,9 @@ void NoopDriver::destroySwapChain(Handle<HwSwapChain> sch) {
 void NoopDriver::destroyStream(Handle<HwStream> sh) {
 }
 
+void NoopDriver::destroySync(Handle<HwSync> sh) {
+}
+
 void NoopDriver::destroyTimerQuery(Handle<HwTimerQuery> tqh) {
 }
 
@@ -131,6 +134,10 @@ Handle<HwStream> NoopDriver::createStreamNative(void* nativeStream) {
 
 Handle<HwStream> NoopDriver::createStreamAcquired() {
     return {};
+}
+
+bool NoopDriver::canCreateSync() {
+    return false;
 }
 
 void NoopDriver::setAcquiredImage(Handle<HwStream> sh, void* image, const math::mat3f& transform,

@@ -87,6 +87,11 @@ public:
 
     using ExternalImageHandleRef = ExternalImageHandle const&;
 
+    class Sync {
+    protected:
+        virtual ~Sync() noexcept = default;
+    };
+
     /**
      * The type of technique for stereoscopic rendering. (Note that the materials used will need to
      * be compatible with the chosen technique.)

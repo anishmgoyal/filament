@@ -281,6 +281,8 @@ DECL_DRIVER_API_R_N(backend::SwapChainHandle, createSwapChainHeadless,
         uint32_t, height,
         uint64_t, flags)
 
+DECL_DRIVER_API_R_0(backend::SyncHandle, createSync)
+
 DECL_DRIVER_API_R_0(backend::TimerQueryHandle, createTimerQuery)
 
 DECL_DRIVER_API_R_N(backend::DescriptorSetLayoutHandle, createDescriptorSetLayout,
@@ -326,6 +328,7 @@ DECL_DRIVER_API_N(destroyTexture,               backend::TextureHandle, th)
 DECL_DRIVER_API_N(destroyRenderTarget,          backend::RenderTargetHandle, rth)
 DECL_DRIVER_API_N(destroySwapChain,             backend::SwapChainHandle, sch)
 DECL_DRIVER_API_N(destroyStream,                backend::StreamHandle, sh)
+DECL_DRIVER_API_N(destroySync,                  backend::SyncHandle, sh)
 DECL_DRIVER_API_N(destroyTimerQuery,            backend::TimerQueryHandle, sh)
 DECL_DRIVER_API_N(destroyFence,                 backend::FenceHandle, fh)
 DECL_DRIVER_API_N(destroyDescriptorSetLayout,   backend::DescriptorSetLayoutHandle, dslh)
@@ -337,6 +340,7 @@ DECL_DRIVER_API_N(destroyDescriptorSet,         backend::DescriptorSetHandle, ds
  */
 
 DECL_DRIVER_API_SYNCHRONOUS_0(void, terminate)
+DECL_DRIVER_API_SYNCHRONOUS_0(bool, canCreateSync)
 DECL_DRIVER_API_SYNCHRONOUS_N(backend::StreamHandle, createStreamNative, void*, stream)
 DECL_DRIVER_API_SYNCHRONOUS_0(backend::StreamHandle, createStreamAcquired)
 DECL_DRIVER_API_SYNCHRONOUS_N(void, setAcquiredImage, backend::StreamHandle, stream, void*, image, const math::mat3f&, transform, backend::CallbackHandler*, handler, backend::StreamCallback, cb, void*, userData)

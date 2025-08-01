@@ -623,6 +623,10 @@ Handle<HwSwapChain> OpenGLDriver::createSwapChainHeadlessS() noexcept {
     return initHandle<GLSwapChain>();
 }
 
+Handle<HwSync> OpenGLDriver::createSyncS() noexcept {
+    return {};  // Not implemented yet.
+}
+
 Handle<HwTimerQuery> OpenGLDriver::createTimerQueryS() noexcept {
     return initHandle<GLTimerQuery>();
 }
@@ -2051,6 +2055,12 @@ void OpenGLDriver::destroyStream(Handle<HwStream> sh) {
     }
 }
 
+void OpenGLDriver::destroySync(Handle<HwSync> sh) {
+    DEBUG_MARKER()
+
+    // Do nothing for now.
+}
+
 void OpenGLDriver::destroyTimerQuery(Handle<HwTimerQuery> tqh) {
     DEBUG_MARKER()
 
@@ -2095,6 +2105,18 @@ Handle<HwStream> OpenGLDriver::createStreamNative(void* nativeStream) {
 
 Handle<HwStream> OpenGLDriver::createStreamAcquired() {
     return initHandle<GLStream>();
+}
+
+bool OpenGLDriver::canCreateSync() {
+    return false;
+}
+
+Handle<HwSync> OpenGLDriver::createSyncS() noexcept {
+    return {};
+}
+
+void OpenGLDriver::createSyncR(Handle<HwSync> handle) noexcept {
+
 }
 
 // Stashes an acquired external image and a release callback. The image is not bound to OpenGL until

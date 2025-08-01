@@ -156,6 +156,10 @@ struct HwStream : public HwBase {
     }
 };
 
+struct HwSync : public HwBase {
+    Platform::Sync* sync = nullptr;
+};
+
 struct HwTimerQuery : public HwBase {
 };
 
