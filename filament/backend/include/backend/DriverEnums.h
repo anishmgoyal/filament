@@ -111,6 +111,12 @@ static constexpr uint64_t SWAP_CHAIN_CONFIG_PROTECTED_CONTENT   = 0x40;
  */
 static constexpr uint64_t SWAP_CHAIN_CONFIG_MSAA_4_SAMPLES      = 0x80;
 
+/**
+ * By default, swap chains are initialized with depth buffers. In some cases (e.g. 2d drawing),
+ * a depth buffer isn't needed, so allow disabling of depth buffer creation.
+ */
+static constexpr uint64_t SWAP_CHAIN_CONFIG_NO_DEPTH_BUFFER     = 0x100;
+
 static constexpr size_t MAX_VERTEX_ATTRIBUTE_COUNT  = 16;   // This is guaranteed by OpenGL ES.
 static constexpr size_t MAX_SAMPLER_COUNT           = 62;   // Maximum needed at feature level 3.
 static constexpr size_t MAX_VERTEX_BUFFER_COUNT     = 16;   // Max number of bound buffer objects.

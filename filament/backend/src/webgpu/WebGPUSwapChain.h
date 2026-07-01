@@ -83,6 +83,7 @@ private:
 
     wgpu::Surface mSurface = {};
     wgpu::SurfaceConfiguration mConfig = {};
+    bool mNeedDepth = true;
     bool mNeedStencil = false;
     wgpu::TextureFormat mDepthFormat = wgpu::TextureFormat::Undefined;
     wgpu::Texture mDepthTexture = nullptr;

@@ -53,6 +53,19 @@ inline uint8_t getLayerCount(SamplerType const target, uint32_t const depth) {
     }
 }
 
+inline VkSampleCountFlags getSampleCounts(const VkPhysicalDeviceLimits& limits, VkFormat format) {
+    if (fvkutils::isVkDepthStencilFormat(format)) {
+        return limits.sampledImageDepthSampleCounts & limits.sampledImageStencilSampleCounts;
+    } else if (fvkutils::isVkDepthFormat(format)) {
+        return limits.sampledImageDepthSampleCounts;
+    } else if (fvkutils::isVkStencilFormat(format)) {
+        return limits.sampledImageStencilSampleCounts;
+    } else {
+        // Note: we don't support data images, assume color image.
+        return limits.sampledImageColorSampleCounts;
+    }
+}
+
 VkComponentMapping composeSwizzle(VkComponentMapping const& prev, VkComponentMapping const& next) {
     static constexpr VkComponentSwizzle IDENTITY[] = {
         VK_COMPONENT_SWIZZLE_R,
@@ -449,17 +462,14 @@ VulkanTexture::VulkanTexture(VkDevice device, VkPhysicalDevice physicalDevice,
     // any kind of attachment (color or depth).
     auto const& limits = context.getPhysicalDeviceLimits();
     if (imageInfo.usage & VK_IMAGE_USAGE_SAMPLED_BIT) {
-        samples = fvkutils::reduceSampleCount(samples,
-                fvkutils::isVkDepthFormat(vkFormat)
-                        ? limits.sampledImageDepthSampleCounts
-                        : limits.sampledImageColorSampleCounts);
+        samples = fvkutils::reduceSampleCount(samples, getSampleCounts(limits, vkFormat));
     }
     if (imageInfo.usage & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) {
         samples = fvkutils::reduceSampleCount(samples, limits.framebufferColorSampleCounts);
     }
 
     if (imageInfo.usage & VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT) {
-        samples = fvkutils::reduceSampleCount(samples, limits.sampledImageDepthSampleCounts);
+        samples = fvkutils::reduceSampleCount(samples, getSampleCounts(limits, vkFormat));
     }
     this->samples = samples;
     imageInfo.samples = (VkSampleCountFlagBits) samples;

@@ -91,9 +91,14 @@ std::tuple<VkImage, VkDeviceMemory> createImageAndMemory(VulkanContext const& co
     return std::tuple(image, imageMemory);
 }
 
-VkFormat selectDepthFormat(fvkutils::VkFormatList const& depthFormats, bool hasStencil) {
+VkFormat selectDepthFormat(fvkutils::VkFormatList const& depthFormats, bool hasDepth, bool hasStencil) {
+    if (!hasDepth && !hasStencil) {
+        return VK_FORMAT_UNDEFINED;
+    }
     auto const formatItr = std::find_if(depthFormats.begin(), depthFormats.end(),
-            hasStencil ? fvkutils::isVkStencilFormat : fvkutils::isVkDepthFormat);
+            hasStencil
+                ? (hasDepth ? fvkutils::isVkDepthStencilFormat : fvkutils::isVkStencilFormat)
+                : fvkutils::isVkDepthFormat);
     assert_invariant(
             formatItr != depthFormats.end() && "Cannot find suitable swapchain depth format");
     return *formatItr;
@@ -158,6 +163,7 @@ VulkanPlatformSurfaceSwapChain::VulkanPlatformSurfaceSwapChain(VulkanContext con
       mSurface(surface),
       mFallbackExtent(fallbackExtent),
       mUsesRGB((flags & backend::SWAP_CHAIN_CONFIG_SRGB_COLORSPACE) != 0),
+      mHasDepth((flags & backend::SWAP_CHAIN_CONFIG_NO_DEPTH_BUFFER) == 0),
       mHasStencil((flags & backend::SWAP_CHAIN_HAS_STENCIL_BUFFER) != 0),
       mIsProtected((flags & backend::SWAP_CHAIN_CONFIG_PROTECTED_CONTENT) != 0),
       mNativeWindow(nativeWindow) {
@@ -284,9 +290,11 @@ VkResult VulkanPlatformSurfaceSwapChain::create() {
     mSwapChainBundle.colors = fvkutils::enumerate(vkGetSwapchainImagesKHR, mDevice, mSwapchain);
     mSwapChainBundle.colorFormat = surfaceFormat.format;
     mSwapChainBundle.depthFormat =
-            selectDepthFormat(mContext.getAttachmentDepthStencilFormats(), mHasStencil);
-    mSwapChainBundle.depth = createImage(mSwapChainBundle.extent,
-            mSwapChainBundle.depthFormat, mIsProtected);
+            selectDepthFormat(mContext.getAttachmentDepthStencilFormats(), mHasDepth, mHasStencil);
+    mSwapChainBundle.depth = mHasStencil || mHasDepth
+                                ? createImage(mSwapChainBundle.extent,
+                                    mSwapChainBundle.depthFormat, mIsProtected)
+                                : VK_NULL_HANDLE;
     mSwapChainBundle.isProtected = mIsProtected;
 
     FVK_LOGI << "vkCreateSwapchain"
@@ -481,10 +489,13 @@ VulkanPlatformHeadlessSwapChain::VulkanPlatformHeadlessSwapChain(VulkanContext c
         images[i] = createImage(extent, mSwapChainBundle.colorFormat, false);
     }
 
+    bool const hasDepth = (flags & backend::SWAP_CHAIN_CONFIG_NO_DEPTH_BUFFER) == 0;
     bool const hasStencil = (flags & backend::SWAP_CHAIN_HAS_STENCIL_BUFFER) != 0;
     mSwapChainBundle.depthFormat =
-            selectDepthFormat(mContext.getAttachmentDepthStencilFormats(), hasStencil);
-    mSwapChainBundle.depth = createImage(extent, mSwapChainBundle.depthFormat, false);
+            selectDepthFormat(mContext.getAttachmentDepthStencilFormats(), hasDepth, hasStencil);
+    mSwapChainBundle.depth = hasDepth || hasStencil
+                                ? createImage(extent, mSwapChainBundle.depthFormat, false)
+                                : VK_NULL_HANDLE;
 }
 
 VulkanPlatformHeadlessSwapChain::~VulkanPlatformHeadlessSwapChain() {
