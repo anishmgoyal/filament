@@ -102,7 +102,13 @@ void printSurfaceConfiguration(wgpu::SurfaceConfiguration const& config,
 }
 
 [[nodiscard]] constexpr wgpu::TextureFormat selectDepthFormat(bool depth32FloatStencil8Enabled,
-        bool needStencil) {
+        bool needDepth, bool needStencil) {
+    if (!needDepth && !needStencil) {
+        return wgpu::TextureFormat::Undefined;
+    }
+    if (!needDepth && needStencil) {
+        return wgpu::TextureFormat::Stencil8;
+    }
     if (needStencil) {
         if (depth32FloatStencil8Enabled) {
             return wgpu::TextureFormat::Depth32FloatStencil8;
@@ -198,6 +204,9 @@ void initConfig(wgpu::SurfaceConfiguration& config, wgpu::Device const& device,
 
 [[nodiscard]] wgpu::Texture createDepthTexture(wgpu::Device const& device,
         wgpu::Extent2D const& extent, wgpu::TextureFormat depthFormat) {
+    if (depthFormat == wgpu::TextureFormat::Undefined) {
+        return nullptr;
+    }
     wgpu::TextureDescriptor descriptor{ .label = "depth_texture",
         .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment,
         .dimension = wgpu::TextureDimension::e2D,
@@ -215,7 +224,10 @@ void initConfig(wgpu::SurfaceConfiguration& config, wgpu::Device const& device,
 }
 
 [[nodiscard]] wgpu::TextureView createDepthTextureView(wgpu::Texture const& depthTexture,
-        wgpu::TextureFormat const& depthFormat, bool const needStencil) {
+        wgpu::TextureFormat const& depthFormat, bool const needDepth, bool const needStencil) {
+    if (!(needDepth || needStencil)) {
+        return nullptr;
+    }
     wgpu::TextureViewDescriptor descriptor{
         .label = "depth_texture_view",
         .dimension = wgpu::TextureViewDimension::e2D,
@@ -226,10 +238,10 @@ void initConfig(wgpu::SurfaceConfiguration& config, wgpu::Device const& device,
         .aspect = wgpu::TextureAspect::DepthOnly,
         .usage = wgpu::TextureUsage::TextureBinding | wgpu::TextureUsage::RenderAttachment
     };
-    if (needStencil) {
+    if (needDepth && needStencil) {
         descriptor.aspect = wgpu::TextureAspect::All;
         descriptor.format = depthFormat;
-    } else {
+    } else if (needDepth) {
         descriptor.aspect = wgpu::TextureAspect::DepthOnly;
         if (depthFormat == wgpu::TextureFormat::Depth32FloatStencil8) {
             descriptor.format = wgpu::TextureFormat::Depth32Float;
@@ -238,6 +250,9 @@ void initConfig(wgpu::SurfaceConfiguration& config, wgpu::Device const& device,
         } else {
             descriptor.format = depthFormat;
         }
+    } else {
+        descriptor.aspect = wgpu::TextureAspect::StencilOnly;
+        descriptor.format = wgpu::TextureFormat::Stencil8;
     }
     wgpu::TextureView depthTextureView = depthTexture.CreateView(&descriptor);
     FILAMENT_CHECK_POSTCONDITION(depthTextureView) << "Failed to create depth texture view";
@@ -250,11 +265,12 @@ WebGPUSwapChain::WebGPUSwapChain(wgpu::Surface&& surface, wgpu::Extent2D const& 
         wgpu::Adapter const& adapter, wgpu::Device const& device, void* nativeWindow, uint64_t flags)
     : mDevice{device},
       mSurface{surface},
+      mNeedDepth{!(flags & SWAP_CHAIN_CONFIG_NO_DEPTH_BUFFER)},
       mNeedStencil{(flags & SWAP_CHAIN_HAS_STENCIL_BUFFER) != 0},
       mDepthFormat{selectDepthFormat(device.HasFeature(wgpu::FeatureName::Depth32FloatStencil8),
-              mNeedStencil)},
+              mNeedDepth, mNeedStencil)},
       mDepthTexture{createDepthTexture(device, extent, mDepthFormat)},
-      mDepthTextureView{createDepthTextureView(mDepthTexture, mDepthFormat, mNeedStencil)},
+      mDepthTextureView{createDepthTextureView(mDepthTexture, mDepthFormat, mNeedDepth, mNeedStencil)},
       mType{SwapChainType::SURFACE},
       mHeadlessWidth{0},
       mHeadlessHeight{0},
@@ -280,11 +296,12 @@ WebGPUSwapChain::WebGPUSwapChain(wgpu::Surface&& surface, wgpu::Extent2D const& 
 WebGPUSwapChain::WebGPUSwapChain(wgpu::Extent2D const& extent,
         wgpu::Adapter const& adapter, wgpu::Device const& device, uint64_t flags)
     : mDevice{device},
+      mNeedDepth{(flags & SWAP_CHAIN_CONFIG_NO_DEPTH_BUFFER) == 0},
       mNeedStencil{(flags & SWAP_CHAIN_HAS_STENCIL_BUFFER) != 0},
       mDepthFormat{selectDepthFormat(device.HasFeature(wgpu::FeatureName::Depth32FloatStencil8),
-            mNeedStencil)},
+            mNeedDepth, mNeedStencil)},
       mDepthTexture{createDepthTexture(device, extent, mDepthFormat)},
-      mDepthTextureView{createDepthTextureView(mDepthTexture, mDepthFormat, mNeedStencil)},
+      mDepthTextureView{createDepthTextureView(mDepthTexture, mDepthFormat, mNeedDepth, mNeedStencil)},
       mType{SwapChainType::HEADLESS},
       mHeadlessWidth{extent.width},
       mHeadlessHeight{extent.height}{

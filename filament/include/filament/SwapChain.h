@@ -207,7 +207,9 @@ public:
     static constexpr uint64_t CONFIG_SRGB_COLORSPACE = backend::SWAP_CHAIN_CONFIG_SRGB_COLORSPACE;
 
     /**
-     * Indicates that this SwapChain should allocate a stencil buffer in addition to a depth buffer.
+     * Indicates that this SwapChain should allocate a stencil buffer in addition to a depth buffer
+     * (unless CONFIG_NO_DEPTH_BUFFER is specified, in which case only a stencil buffer will be
+     * allocated).
      *
      * This flag is necessary when using View::setStencilBufferEnabled and rendering directly into
      * the SwapChain (when post-processing is disabled).
@@ -222,6 +224,9 @@ public:
      * Depth + stencil (with CONFIG_HAS_STENCIL_BUFFER):
      * - DEPTH32F_STENCIL8
      * - DEPTH24F_STENCIL8
+     *
+     * Stencil only (with CONFIG_HAS_STENCIL_BUFFER and CONFIG_NO_DEPTH_BUFFER):
+     * - STENCIL8
      *
      * Note that enabling the stencil buffer may hinder depth precision and should only be used if
      * necessary.
@@ -251,6 +256,18 @@ public:
      * @see isMSAASwapChainSupported(4)
      */
     static constexpr uint64_t CONFIG_MSAA_4_SAMPLES = backend::SWAP_CHAIN_CONFIG_MSAA_4_SAMPLES;
+
+    /**
+     * Indicates that this SwapChain should not allocate a depth buffer.
+     *
+     * By default, swap chains are initialized with depth buffers. In some
+     * cases (e.g. 2d drawing), a depth buffer isn't needed, so allow disabling
+     * of depth buffer creation.
+     *
+     * If this is specified with CONFIG_HAS_STENCIL_BUFFER, only a stencil
+     * buffer will be allocated.
+     */
+    static constexpr uint64_t CONFIG_NO_DEPTH_BUFFER = backend::SWAP_CHAIN_CONFIG_NO_DEPTH_BUFFER;
 
     /**
      * Return whether createSwapChain supports the CONFIG_PROTECTED_CONTENT flag.

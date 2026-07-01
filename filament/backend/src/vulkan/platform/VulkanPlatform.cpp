@@ -428,9 +428,14 @@ fvkutils::VkFormatList findAttachmentDepthStencilFormats(VkPhysicalDevice device
 
     // The ordering here indicates the preference of choosing depth+stencil format.
     constexpr VkFormat formats[] = {
+        // Depth-only formats
         VK_FORMAT_D32_SFLOAT,
         VK_FORMAT_X8_D24_UNORM_PACK32,
 
+        // Stencil-only formats
+        VK_FORMAT_S8_UINT,
+
+        // Depth + Stencil formats
         VK_FORMAT_D32_SFLOAT_S8_UINT,
         VK_FORMAT_D24_UNORM_S8_UINT,
     };
@@ -458,7 +463,7 @@ fvkutils::VkFormatList findBlittableDepthStencilFormats(VkPhysicalDevice device)
             continue;
         }
 
-        if (fvkutils::isVkDepthFormat(format)) {
+        if (fvkutils::isVkDepthFormat(format) || fvkutils::isVkStencilFormat(format)) {
             VkFormatProperties props;
             vkGetPhysicalDeviceFormatProperties(device, format, &props);
             if ((props.optimalTilingFeatures & required) == required) {

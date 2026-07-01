@@ -443,7 +443,7 @@ EGLConfig PlatformEGL::findSwapChainConfig(
             { EGL_GREEN_SIZE,       8 },
             { EGL_BLUE_SIZE,        8 },
             { EGL_ALPHA_SIZE,      (flags & SWAP_CHAIN_CONFIG_TRANSPARENT) ? 8 : 0 },
-            { EGL_DEPTH_SIZE,      24 },
+            { EGL_DEPTH_SIZE,      !(flags & SWAP_CHAIN_CONFIG_NO_DEPTH_BUFFER) ? 24 : 0 },
             { EGL_STENCIL_SIZE,    (flags & SWAP_CHAIN_HAS_STENCIL_BUFFER) ? 8 : 0 }
     };
 

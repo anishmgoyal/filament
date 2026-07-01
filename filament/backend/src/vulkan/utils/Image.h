@@ -101,6 +101,8 @@ bool isVkDepthFormat(VkFormat format);
 
 bool isVkStencilFormat(VkFormat format);
 
+bool isVkDepthStencilFormat(VkFormat format);
+
 bool isVKYcbcrConversionFormat(VkFormat format);
 
 VkImageAspectFlags getImageAspect(VkFormat format);

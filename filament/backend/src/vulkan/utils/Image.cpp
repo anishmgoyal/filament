@@ -191,6 +191,12 @@ bool isVkStencilFormat(VkFormat format) {
     return (getImageAspect(format) & VK_IMAGE_ASPECT_STENCIL_BIT) != 0;
 }
 
+bool isVkDepthStencilFormat(VkFormat format) {
+    const auto aspect = getImageAspect(format);
+    return (aspect & VK_IMAGE_ASPECT_DEPTH_BIT) != 0 &&
+           (aspect & VK_IMAGE_ASPECT_STENCIL_BIT) != 0;
+}
+
 bool isVKYcbcrConversionFormat(VkFormat format) {
     switch (format) {
         case VK_FORMAT_G8B8G8R8_422_UNORM:

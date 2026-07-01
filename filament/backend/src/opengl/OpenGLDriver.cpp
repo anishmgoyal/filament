@@ -2169,7 +2169,10 @@ void OpenGLDriver::createSwapChainR(Handle<HwSwapChain> sch, void* nativeWindow,
 
     // TODO: This is a bit fragile, instead we should ask the SwapChain for its actual attachments.
     //       But this requires an API change in the platform. So we can do that later if needed.
-    sc->attachments = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
+    sc->attachments = TargetBufferFlags::COLOR;
+    if (!(flags & SWAP_CHAIN_CONFIG_NO_DEPTH_BUFFER)) {
+        sc->attachments |= TargetBufferFlags::DEPTH;
+    }
     if (flags & SWAP_CHAIN_CONFIG_HAS_STENCIL_BUFFER) {
         sc->attachments |= TargetBufferFlags::STENCIL;
     }
@@ -2198,7 +2201,10 @@ void OpenGLDriver::createSwapChainHeadlessR(Handle<HwSwapChain> sch,
 
     // TODO: This is a bit fragile, instead we should ask the SwapChain for its actual attachments.
     //       But this requires an API change in the platform. So we can do that later if needed.
-    sc->attachments = TargetBufferFlags::COLOR | TargetBufferFlags::DEPTH;
+    sc->attachments = TargetBufferFlags::COLOR;
+    if (!(flags & SWAP_CHAIN_CONFIG_NO_DEPTH_BUFFER)) {
+        sc->attachments |= TargetBufferFlags::DEPTH;
+    }
     if (flags & SWAP_CHAIN_CONFIG_HAS_STENCIL_BUFFER) {
         sc->attachments |= TargetBufferFlags::STENCIL;
     }

@@ -64,7 +64,8 @@ public final class SwapChainFlags {
     public static final long CONFIG_SRGB_COLORSPACE = 0x10;
 
     /**
-     * Indicates that this SwapChain should allocate a stencil buffer in addition to a depth buffer.
+     * Indicates that this SwapChain should allocate a stencil buffer in addition to a depth buffer
+     * (unless the depth buffer was disabled).
      *
      * This flag is necessary when using View::setStencilBufferEnabled and rendering directly into
      * the SwapChain (when post-processing is disabled).
@@ -79,6 +80,9 @@ public final class SwapChainFlags {
      * Depth + stencil (with CONFIG_HAS_STENCIL_BUFFER):
      * - DEPTH32F_STENCIL8
      * - DEPTH24F_STENCIL8
+     *
+     * If the depth buffer is disabled (with CONFIG_HAS_STENCIL_BUFFER and CONFIG_NO_DEPTH_BUFFER):
+     * - STENCIL8
      *
      * Note that enabling the stencil buffer may hinder depth precision and should only be used if
      * necessary.
@@ -103,4 +107,12 @@ public final class SwapChainFlags {
      * because the swapchain MSAA settings must be configured before window creation.
      */
     public static final long CONFIG_MSAA_4_SAMPLES = 0x80;
+
+    /**
+     * Indicates that this SwapChain should not allocate a depth buffer.
+     *
+     * This flag is useful in 2d drawing scenarios, where a depth test is not required. If this is
+     * specified alongside CONFIG_HAS_STENCIL_BUFFER, there will only be a stencil buffer.
+     */
+    public static final long CONFIG_NO_DEPTH_BUFFER = 0x100;
 }

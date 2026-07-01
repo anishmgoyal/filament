@@ -126,6 +126,7 @@ private:
     uint32_t mCurrentImageReadyIndex;
 
     bool const mUsesRGB = false;
+    bool const mHasDepth = true;
     bool const mHasStencil = false;
     bool const mIsProtected = false;
     bool mSuboptimal;
